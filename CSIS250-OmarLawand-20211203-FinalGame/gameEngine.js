@@ -19,6 +19,12 @@ class Game {
 		this.gameWin = false;
 		this.gameStart = true;
 		this.currentLevel = 1;
+		this.mainMenuMusic = document.getElementById("mainMenuMusic");
+		this.midLevelMusic = document.getElementById("midLevelMusic");
+		this.bossMusic = document.getElementById("bossMusic");
+		this.midLevelMusicOn = false;
+		this.mainMenuMusicOn = false;
+		this.bossMusicOn = false;
 	}
 
 	addSprite(sprite) {
@@ -66,15 +72,19 @@ class Game {
 			switch (this.currentLevel) {
 				case 1:
 					this.firstLevel();
+
+					this.mainMenuMusic.pause();
+
+					if (!this.midLevelMusicOn) {
+						this.midLevelMusic.play();
+
+						this.midLevelMusic.loop = true;
+
+						this.midLevelMusicOn = true;
+					}
 					break;
 				case 2:
 					this.secondLevel();
-
-					if (enemies.length != 0) {
-						for (var i = 0; i < enemies.length; i++) {
-							enemies[i].enabled = false;
-						}
-					}
 
 					if (!furnitureActive) {
 						for (var i = 0; i < furniture.length; i++) {
@@ -99,6 +109,25 @@ class Game {
 						for (var i = 0; i < furniture.length; i++) {
 							furniture[i].enabled = false;
 						}
+					}
+
+					if (!bossActive) {
+						boss.active = true;
+						bossActive = true;
+
+						for (var i = 0; i < 4; i++) {
+							laserOrbs[i].active = true;
+						}
+					}
+
+					this.midLevelMusic.pause();
+
+					if (!this.bossMusicOn) {
+						this.bossMusic.play();
+
+						this.bossMusic.loop = true;
+
+						this.bossMusicOn = true;
 					}
 					break;
 			}
@@ -126,7 +155,7 @@ class Game {
 			this.ctx.drawImage(this.firstLevelImage, 0, 0);
 			this.ctx.font = "13px Futuristic";
 			this.ctx.fillStyle = "white";
-			this.ctx.fillText("Eliminate All Threats To Proceed", 175, 45);
+			this.ctx.fillText("Eliminate All Threats To Proceed", 170, 45);
 			this.ctx.closePath();
 		}
 	}
@@ -136,6 +165,9 @@ class Game {
 		if (secondLevelImageLoaded) {
 			this.ctx.beginPath();
 			this.ctx.drawImage(this.secondLevelImage, 0, 0);
+			this.ctx.font = "13px Futuristic";
+			this.ctx.fillStyle = "white";
+			this.ctx.fillText("Eliminate All Threats To Proceed", 170, 45);
 			this.ctx.closePath();
 		}
 	}
@@ -145,6 +177,9 @@ class Game {
 			//drawing background
 			this.ctx.beginPath();
 			this.ctx.drawImage(this.thirdLevelImage, 0, 0);
+			this.ctx.font = "13px Futuristic";
+			this.ctx.fillStyle = "white";
+			this.ctx.fillText("Eliminate The Boss To Win", 170, 45);
 			this.ctx.closePath();
 		}
 	}
@@ -155,17 +190,18 @@ class Game {
 		this.ctx.font = "50px Futuristic";
 		this.ctx.fillStyle = "white";
 		this.ctx.fillText("Game Over", 125, 125);
-		this.ctx.font = "10px Futuristic";
+		this.ctx.font = "15px Futuristic";
 		this.ctx.fillText("Press Enter To Restart The Game", 150, 200);
 		this.ctx.closePath();
 	}
 
 	gameWinScreen() {
 		this.ctx.beginPath();
-		this.ctx.font = "50px Futuristic";
+		this.ctx.drawImage(this.gameOverImage, 0, 0, 600, 600);
+		this.ctx.font = "45px Futuristic";
 		this.ctx.fillStyle = "white";
 		this.ctx.fillText("You Win! Congrats!", 50, 125);
-		this.ctx.font = "20px Futuristic";
+		this.ctx.font = "15px Futuristic";
 		this.ctx.fillText("Press Enter To Restart The Game", 100, 200);
 		this.ctx.closePath();
 	}
@@ -183,6 +219,14 @@ class Game {
 		this.ctx.fillText("You Have 10 HitPoints", 10, 370);
 		this.ctx.fillText("Press Enter To Start The Game", 10, 400);
 		this.ctx.closePath();
+
+		//if (!this.mainMenuMusicOn) {
+		//	this.mainMenuMusic.play();
+
+		//	this.mainMenuMusic.loop = true;
+
+		//	this.mainMenuMusicOn = true;
+		//}
 	}
 
 	updateSpriteArrays() {
@@ -215,7 +259,6 @@ class Game {
 		}
 	}
 }
-
 
 class Sprite {
 
@@ -296,6 +339,8 @@ class Bullet extends Sprite {
 						secondLevelEnemies[i].hitsTaken++;
 
 						this.enabled = false;
+
+						myGame.addSprite(new BloodAnim(secondLevelEnemies[i].x + 15, secondLevelEnemies[i].y + 10, 30, 30));
 					}
 				}
 			}
@@ -311,23 +356,25 @@ class Bullet extends Sprite {
 						enemies[i].hitsTaken++;
 
 						this.enabled = false;
+
+						myGame.addSprite(new BloodAnim(enemies[i].x + 15, enemies[i].y + 10, 30, 30));
 					}
 				}
 			}
 
-			//if (boss.active &&
-			//	boss.enabled &&
-			//	this.x + this.width >= boss.x &&
-			//	this.x <= boss.x + boss.width &&
-			//	this.y + this.height >= boss.y &&
-			//	this.y <= boss.y + boss.height) {
+			if (boss.active &&
+				boss.enabled &&
+				this.x + this.width >= boss.x &&
+				this.x <= boss.x + boss.width &&
+				this.y + this.height >= boss.y &&
+				this.y <= boss.y + boss.height) {
 
-			//	boss.hitsTaken++;
+				boss.hitsTaken++;
 
-			//	this.enabled = false;
+				this.enabled = false;
 
-			//	myGame.addSprite(new Explosion(boss.x + 50, boss.y + 100));
-			//}
+				myGame.addSprite(new BloodAnim(boss.x + 30, boss.y + 30, 50, 50));
+			}
 		}
 		else {
 			if (this.x + this.width >= player.x &&
@@ -339,6 +386,8 @@ class Bullet extends Sprite {
 				//lives.lifeCount--;
 
 				this.enabled = false;
+
+				myGame.addSprite(new BloodAnim(player.x + 15, player.y + 10, 30, 30));
 			}
 		}
 	}
@@ -623,7 +672,7 @@ class SecondLevelEnemy extends Sprite {
 class Boss extends Sprite {
 	constructor(x, y, velocityX, velocityY, width, height) {
 		super(x, y, velocityX, velocityY, width, height);
-		this.image = bossImage;
+		this.image = enemyImage;
 		this.hitsTaken = 0;
 		this.hitPoints = 30;
 		this.active = false;
@@ -632,36 +681,20 @@ class Boss extends Sprite {
 	}
 
 	update() {
-		if (enemies.length == 0) {
-			this.active = true;
-		}
-
 		if (this.active) {
 			if (this.hitsTaken == this.hitPoints) {
 				this.enabled = false;
 				myGame.gameWin = true;
 			}
-
-			if (this.y < 50)
-				this.y += this.velocityY;
-			
-			this.x += this.velocityX;
-
-			if (this.x > 400 || this.x < 10)
-				this.velocityX = -this.velocityX;
-
-			var now = new Date().getTime();
-
-			if (now - this.prev > 300) {
-				this.prev = now;
-
-				myGame.addSprite(new Bullet(this.x + 100, this.y + 100, 10, 10, 8, 32, false));
-			}
 		}
 	}
 
 	draw(pContext) {
-		
+		if (this.active) {
+			pContext.beginPath();
+			pContext.drawImage(this.image, 0, 0, 128, 190, this.x, this.y, this.width, this.height);
+			pContext.closePath();
+		}
 	}
 }
 
@@ -826,7 +859,22 @@ class Player extends Sprite {
 			}
 		}
 		else if (myGame.currentLevel == 3) {
-
+			if (87 in keysDown && (this.y > 78 || (this.y > 0 && this.x > 250 && (this.x + this.width) < 340)) ) {
+				this.y -= this.velocityY;
+				this.frameIndexY = 3;
+			}
+			if (83 in keysDown && this.y < 480) {
+				this.y += this.velocityY;
+				this.frameIndexY = 0;
+			}
+			if (65 in keysDown && this.x > 78 && this.y > 70) {
+				this.x -= this.velocityX;
+				this.frameIndexY = 1;
+			}
+			if (68 in keysDown && this.x < 480 && this.y > 70) {
+				this.x += this.velocityX;
+				this.frameIndexY = 2;
+			}
 		}
 
 		if (myGame.currentLevel == 1) {
@@ -966,33 +1014,6 @@ class Lives extends Sprite {
 	}
 }
 
-class Explosion extends Sprite {
-	constructor(x, y) {
-		super(x, y, 0, 0, 100, 100);
-		this.image = explosionImage;
-
-		this.prev = 0;
-		
-	}
-
-	update() {
-
-		var now = new Date().getTime();
-
-		if (now - this.prev > 2000) {
-			this.prev = now;
-
-			this.enabled = false;
-		}
-	}
-
-	draw(pContext) {
-		pContext.beginPath();
-		pContext.drawImage(this.image, this.x, this.y, this.width, this.height);
-		pContext.closePath();
-	}
-}
-
 class Chair extends Sprite {
 	constructor(x, y, width, height) {
 		super(x, y, 0, 0, width, height);
@@ -1044,6 +1065,153 @@ class Locker extends Sprite {
 			pContext.drawImage(this.image, this.x, this.y, this.width, this.height);
 			pContext.closePath();
 		}
+	}
+}
+
+class LaserOrb extends Sprite {
+	constructor(x, y, velocityX, velocityY, width, height, direction) {
+		super(x, y, velocityX, velocityY, width, height);
+
+		this.image = laserOrbImage;
+		this.active = false;
+		this.direction = direction;
+		this.prev = 0;
+		this.alternateShots = true;
+		this.isMoving = true;
+	}
+
+	update() {
+		if (this.active) {
+			var now = new Date().getTime();
+
+			switch (this.direction) {
+				case 0:
+					if (this.y > 100)
+						this.y -= this.velocityY;
+					else if (this.y <= 100)
+						this.isMoving = false;
+
+					if (now - this.prev > 500 && !this.isMoving) {
+						this.prev = now;
+
+						if (this.alternateShots) {
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 8, 32, false, 3));
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 8, 32, false, 0));
+						}
+						else {
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 32, 8, false, 1));
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 32, 8, false, 2));
+						}
+
+						this.alternateShots = !this.alternateShots;
+					}
+					break;
+				case 1:
+					if (this.x < 400)
+						this.x += this.velocityX;
+					else if (this.x >= 400)
+						this.isMoving = false;
+
+					if (now - this.prev > 500 && !this.isMoving) {
+						this.prev = now;
+
+						if (this.alternateShots) {
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 32, 8, false, 1));
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 32, 8, false, 2));
+						}
+						else {
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 8, 32, false, 3));
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 8, 32, false, 0));
+						}
+
+						this.alternateShots = !this.alternateShots;
+					}
+					break;
+				case 2:
+					if (this.y < 400)
+						this.y += this.velocityY;
+					else if (this.y >= 400)
+						this.isMoving = false;
+
+					if (now - this.prev > 500 && !this.isMoving) {
+						this.prev = now;
+
+						if (this.alternateShots) {
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 8, 32, false, 3));
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 8, 32, false, 0));
+						}
+						else {
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 32, 8, false, 1));
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 32, 8, false, 2));
+						}
+
+						this.alternateShots = !this.alternateShots;
+					}
+					break;
+				case 3:
+					if (this.x > 100)
+						this.x -= this.velocityX;
+					else if (this.x <= 100)
+						this.isMoving = false;
+
+					if (now - this.prev > 500 && !this.isMoving) {
+						this.prev = now;
+
+						if (this.alternateShots) {
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 32, 8, false, 1));
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 32, 8, false, 2));
+						}
+						else {
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 8, 32, false, 3));
+							myGame.addSprite(new Bullet(this.x + 50, this.y + 50, 10, 10, 8, 32, false, 0));
+						}
+
+						this.alternateShots = !this.alternateShots;
+					}
+					break;
+			}
+		}
+	}
+
+	draw(pContext) {
+		if (this.active) {
+			pContext.beginPath();
+			pContext.drawImage(this.image, this.x, this.y);
+			pContext.closePath();
+		}	
+	}
+}
+
+class BloodAnim extends Sprite {
+	constructor(x, y, width, height) {
+		super(x, y, 0, 0, width, height);
+
+		this.image = bloodImage;
+		this.frameIndexX = 0;
+		this.tickCount = 0;
+		this.ticksPerFrame = 5;
+		this.numberOfFrames = 4;
+	}
+
+	update() {
+		this.tickCount++;
+
+		if (this.tickCount > this.ticksPerFrame) {
+			this.tickCount = 0;
+
+			if (this.frameIndexX < this.numberOfFrames) {
+				this.frameIndexX++;
+			}
+			else if (this.frameIndexX == this.numberOfFrames) {
+				this.enabled = false;
+			}
+		}
+	}
+
+	draw(pContext) {
+		pContext.beginPath();
+		pContext.drawImage(this.image, this.frameIndexX * 103, 0, 103, 93, this.x, this.y, this.width, this.height);
+		pContext.closePath();
 	}
 }
 

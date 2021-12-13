@@ -96,11 +96,19 @@ enemyImage.onload = function () {
 	enemyImageLoaded = true;
 }
 
-//var explosionImage = new Image();
-//explosionImage.src = "spaceshooter_assets/PNG/explosion1.png";
+var laserOrbImage = new Image();
+laserOrbImage.src = "finalGameAssets/laserOrb.png";
+var laserOrbLoaded = false;
+laserOrbImage.onload = function () {
+	laserOrbLoaded = true;
+}
 
-//var bossImage = new Image();
-//bossImage.src = "spaceshooter_assets/PNG/Enemies/enemyRed4.png";
+var bloodImage = new Image();
+bloodImage.src = "finalGameAssets/blood.png";
+var bloodImageLoaded = false;
+bloodImage.onload = function () {
+	bloodImageLoaded = true;
+}
 
 //var playerLifeImage = new Image();
 //var imageLoaded = false;
@@ -113,7 +121,8 @@ var myGame = new Game(600, 600);
 
 var player = new Player(89, 282, 3, 3, 50, 50);
 
-//var boss = new Boss(10, -10, 5, 2, 200, 200);
+var boss = new Boss(250, 250, 0, 0, 100, 100);
+var bossActive = false;
 
 var enemies = [];
 
@@ -176,7 +185,17 @@ for (var i = 4; i < 8; i++) {
 	myGame.addSprite(furniture[i]);
 }
 
+var laserOrbs = [];
+var laserOrbX = boss.x,
+	laserOrbY = boss.y;
+
+for (var i = 0; i < 4; i++) {
+	laserOrbs.push(new LaserOrb(laserOrbX, laserOrbY, 2, 2, 50, 50, i));
+
+	myGame.addSprite(laserOrbs[i]);
+}
+
 //myGame.addSprite(lives);
-//myGame.addSprite(boss);
+myGame.addSprite(boss);
 myGame.addSprite(player);
 animate(myGame);
